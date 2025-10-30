@@ -6,40 +6,31 @@ from google.oauth2.service_account import Credentials
 st.set_page_config(page_title="Google Sheet Form Input", layout="wide")
 st.title("📄 Google Sheet Form Input")
 
-# ==========================
-# GOOGLE SHEET SETUP
-# ==========================
+# Google Sheet ID
 SHEET_ID = "1fitI_tGZEsZIVq0vdlwOXebK_6twq25D7-tOks7x5AM"
-SERVICE_ACCOUNT_FILE = "service_account.json"  # path to your JSON key
 
-# Authenticate with Google Sheets
-scope = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scope)
+# Load credentials from Streamlit secrets
+service_account_info = st.secrets["google_service_account"]
+creds = Credentials.from_service_account_info(service_account_info, scopes=["https://www.googleapis.com/auth/spreadsheets"])
+
+# Connect to Google Sheet
 client = gspread.authorize(creds)
+sheet = client.open_by_key(SHEET_ID).sheet1
 
-# Open sheet
-sheet = client.open_by_key(SHEET_ID).sheet1  # first sheet
+# Display current data
 data = pd.DataFrame(sheet.get_all_records())
-
-# ==========================
-# DISPLAY CURRENT DATA
-# ==========================
 st.subheader("Current Data")
 st.dataframe(data)
 
-# ==========================
-# FORM TO ADD DATA
-# ==========================
+# Form to add new data
 st.subheader("Add New Row")
-with st.form(key="add_row_form"):
-    # Example columns: adapt to your sheet columns
+with st.form("add_row_form"):
     col1 = st.text_input("Column 1")
     col2 = st.text_input("Column 2")
     col3 = st.number_input("Column 3", step=1)
     submitted = st.form_submit_button("Add Row")
-
+    
     if submitted:
-        new_row = [col1, col2, col3]  # match the number/order of your columns
-        sheet.append_row(new_row)
+        sheet.append_row([col1, col2, col3])
         st.success("Row added successfully!")
-        st.experimental_rerun()  # refresh to show new data
+        st.experimental_rerun()
