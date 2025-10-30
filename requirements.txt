@@ -1,5 +1,2 @@
 streamlit
 pandas
-streamlit-gsheets
-gspread
-google-auth
