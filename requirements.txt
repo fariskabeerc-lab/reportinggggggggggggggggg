@@ -1,3 +1,5 @@
-pandas
 streamlit
-streamlit_gsheets
+pandas
+streamlit-gsheets
+gspread
+google-auth
